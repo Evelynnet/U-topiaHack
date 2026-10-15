@@ -1,0 +1,15 @@
+{
+  "name": "parking-agency",
+  "private": true,
+  "description": "Parking space rental agency platform (monorepo)",
+  "scripts": {
+    "install:all": "npm --prefix web install",
+    "dev": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
+    "start": "npm --prefix web run start",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:migrate": "npm --prefix web run db:migrate",
+    "db:seed": "npm --prefix web run db:seed"
+  }
+}
