@@ -29,6 +29,16 @@ export const scheduleEntrySchema = z
   })
   .refine((s) => s.endHour > s.startHour, "endHour must be after startHour");
 
+/** Only accept photo URLs that point at our Vercel Blob (public) store. */
+const blobUrl = z.string().max(500).refine((value) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname.endsWith(".public.blob.vercel-storage.com");
+  } catch {
+    return false;
+  }
+}, "photo must be a Vercel Blob URL");
+
 export const createListingSchema = z
   .object({
     title: z.string().trim().min(3).max(120),
@@ -41,10 +51,7 @@ export const createListingSchema = z
     motorcycleCapacity: z.number().int().min(0).max(1000),
     carPricePerHour: z.number().min(0).max(100000),
     motoPricePerHour: z.number().min(0).max(100000),
-    photos: z
-      .array(z.string().regex(/^\/api\/uploads\/[a-f0-9-]{36}\.(jpg|png|webp)$/))
-      .max(10)
-      .default([]),
+    photos: z.array(blobUrl).max(10).default([]),
     schedule: z.array(scheduleEntrySchema).min(1).max(21),
   })
   .refine((l) => l.carCapacity + l.motorcycleCapacity > 0, "capacity must be > 0");

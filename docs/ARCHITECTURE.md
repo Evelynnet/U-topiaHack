@@ -5,10 +5,14 @@
 ```
 Browser ── Next.js (React UI, Leaflet) ──┐
                                          ├─ Route handlers /api/*  ── PostgreSQL + PostGIS
-Middleware (locale + route guard) ───────┘                         └─ ไฟล์รูป (UPLOAD_DIR)
+Middleware (locale + route guard) ───────┘                         └─ Vercel Blob (รูป)
 ```
 
 Next.js ตัวเดียวทำทั้งหน้าเว็บและ API (`web/src/app/api`) เพื่อให้เริ่มง่าย ถ้าอนาคตต้องแยกหลังบ้าน (เช่น ฝั่ง AI เป็น Python) ให้ย้ายตรรกะใน `web/src/lib` + route handlers ออกเป็นบริการแยกได้โดย schema/SQL ไม่ต้องเปลี่ยน
+
+## รูปภาพ
+
+เบราว์เซอร์อัปโหลดรูปตรงไปที่ Vercel Blob (public store) — `POST /api/uploads` ทำหน้าที่ออก token ให้เฉพาะผู้ที่ล็อกอิน (JPG/PNG/WebP ไม่เกิน 5 MB) ไฟล์จึงไม่ผ่านฟังก์ชัน และไม่ติดเพดาน ~4.5 MB ของ Vercel API รับเฉพาะ URL ที่ลงท้าย `.public.blob.vercel-storage.com` เก็บในตาราง `listing_photos`
 
 ## ข้อมูล (db/migrations/001_init.sql)
 

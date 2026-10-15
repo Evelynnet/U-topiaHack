@@ -40,6 +40,7 @@ export const th = {
     not_pending: "รายการนี้ถูกพิจารณาไปแล้ว",
     unsupported_file_type: "รองรับเฉพาะไฟล์ JPG, PNG, WebP",
     file_too_large: "ไฟล์ใหญ่เกิน 5 MB",
+    upload_failed: "อัปโหลดรูปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
   },
   auth: {
     loginTitle: "เข้าสู่ระบบ",

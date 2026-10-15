@@ -10,9 +10,6 @@ coverage/
 .env.*.local
 !.env.example
 
-web/uploads/*
-!web/uploads/.gitkeep
-
 *.log
 npm-debug.log*
 .DS_Store

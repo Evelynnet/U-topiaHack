@@ -42,6 +42,7 @@ export const en: Dictionary = {
     not_pending: "This listing has already been reviewed.",
     unsupported_file_type: "Only JPG, PNG and WebP files are supported.",
     file_too_large: "File is larger than 5 MB.",
+    upload_failed: "Photo upload failed. Please try again.",
   },
   auth: {
     loginTitle: "Log in",

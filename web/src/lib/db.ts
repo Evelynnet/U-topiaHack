@@ -7,7 +7,11 @@ export function getPool(): Pool {
     if (!process.env.DATABASE_URL) {
       throw new Error("DATABASE_URL is not set");
     }
-    globalForPg.__pgPool = new Pool({ connectionString: process.env.DATABASE_URL });
+    globalForPg.__pgPool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      // Serverless: keep per-instance connections low (use a pooled DATABASE_URL too).
+      max: Number(process.env.PG_POOL_MAX ?? 5),
+    });
   }
   return globalForPg.__pgPool;
 }

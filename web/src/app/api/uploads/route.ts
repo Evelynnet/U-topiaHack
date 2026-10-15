@@ -1,33 +1,43 @@
-import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { requireUser } from "@/lib/auth";
-import { HttpError, handle, json } from "@/lib/http";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 
 const MAX_BYTES = 5 * 1024 * 1024;
-const EXT: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-};
 
-function uploadDir(): string {
-  return path.resolve(process.env.UPLOAD_DIR ?? "./uploads");
+/**
+ * Token endpoint for direct browser -> Vercel Blob uploads (files never pass through
+ * this function, so Vercel's ~4.5 MB request limit doesn't apply).
+ *
+ * This route is also called by Vercel Blob itself when an upload finishes; that call has
+ * no user cookie, which is why authentication lives inside onBeforeGenerateToken only.
+ */
+export async function POST(request: Request) {
+  const body = (await request.json()) as HandleUploadBody;
+
+  try {
+    const result = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async () => {
+        const session = await getSession();
+        if (!session) throw new Error("unauthorized");
+        return {
+          allowedContentTypes: ["image/jpeg", "image/png", "image/webp"],
+          maximumSizeInBytes: MAX_BYTES,
+          addRandomSuffix: true,
+          tokenPayload: JSON.stringify({ userId: session.userId }),
+        };
+      },
+      onUploadCompleted: async () => {
+        // Nothing to do: the listing form sends the blob URLs along with the listing.
+      },
+    });
+    return NextResponse.json(result);
+  } catch (err) {
+    const unauthorized = err instanceof Error && err.message === "unauthorized";
+    return NextResponse.json(
+      { error: unauthorized ? "unauthorized" : "upload_failed" },
+      { status: unauthorized ? 401 : 400 },
+    );
+  }
 }
-
-export const POST = handle(async (req: Request) => {
-  await requireUser();
-
-  const form = await req.formData();
-  const file = form.get("file");
-  if (!(file instanceof File)) throw new HttpError(400, "invalid_input");
-  const ext = EXT[file.type];
-  if (!ext) throw new HttpError(415, "unsupported_file_type");
-  if (file.size > MAX_BYTES) throw new HttpError(413, "file_too_large");
-
-  const name = `${randomUUID()}.${ext}`;
-  await mkdir(uploadDir(), { recursive: true });
-  await writeFile(path.join(uploadDir(), name), Buffer.from(await file.arrayBuffer()));
-
-  return json({ url: `/api/uploads/${name}` }, 201);
-});

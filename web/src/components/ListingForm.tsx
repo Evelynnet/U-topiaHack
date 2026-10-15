@@ -1,9 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { api, errorMessage, postJson } from "@/lib/api-client";
+import { errorMessage, postJson } from "@/lib/api-client";
 import { useI18n } from "@/i18n/provider";
 import type { LatLng } from "./LocationPicker";
 
@@ -19,6 +20,9 @@ interface ScheduleRow {
 }
 
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
 export default function ListingForm() {
   const { locale, t } = useI18n();
@@ -59,19 +63,26 @@ export default function ListingForm() {
     const files = Array.from(e.target.files ?? []).slice(0, 10 - photos.length);
     e.target.value = "";
     if (files.length === 0) return;
+
+    // Same rules as the server enforces, checked first for a friendlier message.
+    if (files.some((f) => !PHOTO_TYPES.includes(f.type))) return setError(t.errors.unsupported_file_type);
+    if (files.some((f) => f.size > MAX_PHOTO_BYTES)) return setError(t.errors.file_too_large);
+
     setUploading(true);
     setError(null);
     try {
       const urls: string[] = [];
       for (const file of files) {
-        const form = new FormData();
-        form.append("file", file);
-        const res = await api<{ url: string }>("/api/uploads", { method: "POST", body: form });
-        urls.push(res.url);
+        // The file goes straight from the browser to Vercel Blob; /api/uploads only issues the token.
+        const blob = await upload(`listings/photo.${EXT[file.type]}`, file, {
+          access: "public",
+          handleUploadUrl: "/api/uploads",
+        });
+        urls.push(blob.url);
       }
       setPhotos((p) => [...p, ...urls]);
-    } catch (err) {
-      setError(errorMessage(t, err));
+    } catch {
+      setError(t.errors.upload_failed);
     } finally {
       setUploading(false);
     }
