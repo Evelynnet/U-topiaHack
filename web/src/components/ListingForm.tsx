@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { errorMessage, postJson } from "@/lib/api-client";
 import { useI18n } from "@/i18n/provider";
 import type { LatLng } from "./LocationPicker";
@@ -23,6 +23,18 @@ const HOURS = Array.from({ length: 24 }, (_, h) => h);
 const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
+function Section({ n, title, children }: { n: number; title: string; children: ReactNode }) {
+  return (
+    <section className="card">
+      <h2 className="section-title">
+        <span className="num">{n}</span>
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
 
 export default function ListingForm() {
   const { locale, t } = useI18n();
@@ -45,7 +57,9 @@ export default function ListingForm() {
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+
+  const cars = Number(carCapacity) || 0;
+  const motos = Number(motoCapacity) || 0;
 
   function updateRow(i: number, patch: Partial<ScheduleRow>) {
     setSchedule((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
@@ -92,8 +106,6 @@ export default function ListingForm() {
     e.preventDefault();
     setError(null);
 
-    const cars = Number(carCapacity) || 0;
-    const motos = Number(motoCapacity) || 0;
     const days = schedule
       .map((r, dayOfWeek) => ({ ...r, dayOfWeek }))
       .filter((r) => r.enabled && r.end > r.start);
@@ -118,20 +130,12 @@ export default function ListingForm() {
         photos,
         schedule: days.map((d) => ({ dayOfWeek: d.dayOfWeek, startHour: d.start, endHour: d.end })),
       });
-      setDone(true);
-      setTimeout(() => router.push(`/${locale}/owner`), 1500);
+      // Separate "awaiting confirmation" page.
+      router.push(`/${locale}/owner/submitted`);
     } catch (err) {
       setError(errorMessage(t, err));
       setBusy(false);
     }
-  }
-
-  if (done) {
-    return (
-      <div className="page">
-        <div className="alert success">{t.listing.submitted}</div>
-      </div>
-    );
   }
 
   return (
@@ -142,7 +146,7 @@ export default function ListingForm() {
       {error && <div className="alert error">{error}</div>}
 
       <form onSubmit={onSubmit}>
-        <div className="card">
+        <Section n={1} title={t.listing.sectionDetails}>
           <div className="field">
             <label htmlFor="title">{t.listing.title}</label>
             <input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required minLength={3} maxLength={120} />
@@ -155,64 +159,62 @@ export default function ListingForm() {
             <label htmlFor="address">{t.listing.address}</label>
             <input id="address" value={address} onChange={(e) => setAddress(e.target.value)} required minLength={3} maxLength={300} />
           </div>
-        </div>
-
-        <div className="card">
-          <div className="field">
-            <label>{t.listing.location}</label>
-            <div className="picker">
-              <LocationPicker value={position} onChange={setPosition} />
-            </div>
-            <div className="hint">{t.listing.locationHint}</div>
-            <button type="button" className="btn secondary small" style={{ marginTop: 8 }} onClick={locateMe}>
-              📍 {t.listing.useMyLocation}
-            </button>
+          <div className="field" style={{ maxWidth: 240 }}>
+            <label htmlFor="area">{t.listing.area}</label>
+            <input id="area" type="number" min="0" step="0.1" value={area} onChange={(e) => setArea(e.target.value)} />
           </div>
-        </div>
+        </Section>
 
-        <div className="card">
+        <Section n={2} title={t.listing.location}>
+          <div className="picker">
+            <LocationPicker value={position} onChange={setPosition} />
+          </div>
+          <div className="hint">{t.listing.locationHint}</div>
+          <button type="button" className="btn secondary small" style={{ marginTop: 8 }} onClick={locateMe}>
+            📍 {t.listing.useMyLocation}
+          </button>
+        </Section>
+
+        <Section n={3} title={t.listing.sectionVehicles}>
+          <div className="hint" style={{ marginBottom: 10 }}>{t.listing.vehiclesHint}</div>
           <div className="row">
             <div className="field">
-              <label htmlFor="area">{t.listing.area}</label>
-              <input id="area" type="number" min="0" step="0.1" value={area} onChange={(e) => setArea(e.target.value)} />
-            </div>
-            <div className="field">
-              <label htmlFor="cars">{t.listing.carCapacity}</label>
+              <label htmlFor="cars">🚗 {t.listing.carCapacity}</label>
               <input id="cars" type="number" min="0" max="500" value={carCapacity} onChange={(e) => setCarCapacity(e.target.value)} />
             </div>
             <div className="field">
-              <label htmlFor="motos">{t.listing.motoCapacity}</label>
+              <label htmlFor="motos">🏍️ {t.listing.motoCapacity}</label>
               <input id="motos" type="number" min="0" max="1000" value={motoCapacity} onChange={(e) => setMotoCapacity(e.target.value)} />
             </div>
           </div>
+        </Section>
+
+        <Section n={4} title={t.listing.sectionPrice}>
           <div className="row">
             <div className="field">
-              <label htmlFor="carPrice">{t.listing.carPrice}</label>
-              <input id="carPrice" type="number" min="0" step="1" value={carPrice} onChange={(e) => setCarPrice(e.target.value)} />
+              <label htmlFor="carPrice">🚗 {t.listing.carPrice}</label>
+              <input id="carPrice" type="number" min="0" step="1" value={carPrice} onChange={(e) => setCarPrice(e.target.value)} disabled={cars < 1} />
             </div>
             <div className="field">
-              <label htmlFor="motoPrice">{t.listing.motoPrice}</label>
-              <input id="motoPrice" type="number" min="0" step="1" value={motoPrice} onChange={(e) => setMotoPrice(e.target.value)} />
+              <label htmlFor="motoPrice">🏍️ {t.listing.motoPrice}</label>
+              <input id="motoPrice" type="number" min="0" step="1" value={motoPrice} onChange={(e) => setMotoPrice(e.target.value)} disabled={motos < 1} />
             </div>
           </div>
-        </div>
+          <div className="hint">{t.listing.priceHint}</div>
+        </Section>
 
-        <div className="card">
-          <div className="field">
-            <label htmlFor="photos">{t.listing.photos}</label>
-            <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={onPhotos} disabled={uploading || photos.length >= 10} />
-            <div className="hint">{uploading ? t.listing.uploading : t.listing.photosHint}</div>
-            <div className="thumbs">
-              {photos.map((url) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={url} src={url} alt="" />
-              ))}
-            </div>
+        <Section n={5} title={t.listing.photos}>
+          <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={onPhotos} disabled={uploading || photos.length >= 10} />
+          <div className="hint">{uploading ? t.listing.uploading : t.listing.photosHint}</div>
+          <div className="thumbs">
+            {photos.map((url) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={url} src={url} alt="" />
+            ))}
           </div>
-        </div>
+        </Section>
 
-        <div className="card">
-          <label>{t.listing.schedule}</label>
+        <Section n={6} title={t.listing.schedule}>
           <div className="hint" style={{ marginBottom: 10 }}>{t.listing.scheduleHint}</div>
           {schedule.map((row, i) => (
             <div className="sched-row" key={i}>
@@ -232,7 +234,7 @@ export default function ListingForm() {
               </select>
             </div>
           ))}
-        </div>
+        </Section>
 
         <button className="btn block" disabled={busy || uploading}>
           {busy ? t.listing.submitting : t.listing.submit}

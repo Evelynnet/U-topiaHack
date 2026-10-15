@@ -2,8 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { LOCALE_COOKIE, defaultLocale, isLocale, type Locale } from "./i18n/config";
 import { SESSION_COOKIE, readSessionToken } from "./lib/token";
 
-const PROTECTED = ["map", "owner", "bookings", "admin"];
-const AUTH_PAGES = ["login", "register"];
+// Pages that need a signed-in user. The home page (the map) is public.
+const PROTECTED = ["owner", "bookings", "admin"];
 
 function pickLocale(req: NextRequest): Locale {
   const saved = req.cookies.get(LOCALE_COOKIE)?.value;
@@ -27,22 +27,28 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // 2) Gate private pages behind a valid session; keep signed-in users off login/register.
+  // 2) Old URLs: the map is the home page and login/sign-up are a pop-up on it.
+  if (second === "map" || second === "login" || second === "register") {
+    const url = req.nextUrl.clone();
+    url.pathname = `/${first}`;
+    url.search = second === "login" ? "?login=1" : second === "register" ? "?signup=1" : "";
+    return NextResponse.redirect(url);
+  }
+
+  // 3) Private pages: send guests to the home page with the login pop-up open,
+  //    and bring them back to where they were headed after they sign in.
   const session = await readSessionToken(req.cookies.get(SESSION_COOKIE)?.value);
 
   if (PROTECTED.includes(second) && !session) {
     const url = req.nextUrl.clone();
-    url.pathname = `/${first}/login`;
+    url.pathname = `/${first}`;
+    url.search = `?login=1&next=${encodeURIComponent(pathname)}`;
     return NextResponse.redirect(url);
   }
   if (second === "admin" && session && session.role !== "admin") {
     const url = req.nextUrl.clone();
-    url.pathname = `/${first}/map`;
-    return NextResponse.redirect(url);
-  }
-  if (AUTH_PAGES.includes(second) && session) {
-    const url = req.nextUrl.clone();
-    url.pathname = `/${first}/map`;
+    url.pathname = `/${first}`;
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { AuthProvider } from "@/components/AuthProvider";
 import Navbar from "@/components/Navbar";
 import { getDictionary, isLocale, locales } from "@/i18n/config";
 import { I18nProvider } from "@/i18n/provider";
@@ -27,13 +28,16 @@ export default async function RootLayout({
   if (!isLocale(locale)) notFound();
 
   const session = await getSession();
+  const initialUser = session ? { id: session.userId, name: session.name, role: session.role } : null;
 
   return (
     <html lang={locale}>
       <body>
         <I18nProvider locale={locale} dict={getDictionary(locale)}>
-          <Navbar user={session ? { name: session.name, role: session.role } : null} />
-          {children}
+          <AuthProvider initialUser={initialUser}>
+            <Navbar />
+            {children}
+          </AuthProvider>
         </I18nProvider>
       </body>
     </html>

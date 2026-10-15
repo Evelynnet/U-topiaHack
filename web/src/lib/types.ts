@@ -1,5 +1,11 @@
 export type VehicleType = "car" | "motorcycle";
 
+export interface AuthUser {
+  id?: string;
+  name: string;
+  role: "user" | "admin";
+}
+
 export interface VehicleAvailability {
   capacity: number;
   available: number;

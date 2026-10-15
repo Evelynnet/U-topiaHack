@@ -21,10 +21,11 @@ interface ListingRow {
   photos: string[];
 }
 
-/** Approved listings with live availability for the requested time window. */
+/**
+ * Approved listings with live availability for the requested time window.
+ * Public on purpose: the home page shows the map to guests too.
+ */
 export const GET = handle(async (req: Request) => {
-  await requireUser();
-
   const url = new URL(req.url);
   const { start, hours } = listingQuerySchema.parse({
     start: url.searchParams.get("start"),

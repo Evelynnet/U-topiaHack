@@ -2,61 +2,90 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { postJson } from "@/lib/api-client";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/i18n/provider";
+import { useAuth } from "./AuthProvider";
 
-interface Props {
-  user: { name: string; role: "user" | "admin" } | null;
-}
-
-export default function Navbar({ user }: Props) {
+export default function Navbar() {
   const { locale, t } = useI18n();
+  const { user, requireLogin, openLogin, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   const other = locale === "th" ? "en" : "th";
   const switchHref = pathname.replace(/^\/(th|en)(?=\/|$)/, `/${other}`);
+  const listHref = `/${locale}/owner/new`;
 
-  const links = user
-    ? [
-        { href: `/${locale}/map`, label: t.nav.map },
-        { href: `/${locale}/owner/new`, label: t.nav.addListing },
-        { href: `/${locale}/owner`, label: t.nav.myListings },
-        { href: `/${locale}/bookings`, label: t.nav.myBookings },
-        ...(user.role === "admin" ? [{ href: `/${locale}/admin`, label: t.nav.admin }] : []),
-      ]
-    : [];
-
-  async function logout() {
-    await postJson("/api/auth/logout").catch(() => null);
-    router.push(`/${locale}/login`);
-    router.refresh();
+  function onList() {
+    if (requireLogin(t.auth.loginRequiredList, () => router.push(listHref))) router.push(listHref);
   }
+
+  const initial = user?.name.trim().charAt(0).toUpperCase() || "?";
 
   return (
     <header className="navbar">
       <Link className="brand" href={`/${locale}`}>
         🅿️ {t.common.appName}
       </Link>
-      <nav>
-        {links.map((l) => (
-          <Link key={l.href} href={l.href} className={pathname === l.href ? "active" : undefined}>
-            {l.label}
-          </Link>
-        ))}
-      </nav>
+      <div className="spacer" />
       <div className="right">
+        <button type="button" className="btn secondary small" onClick={onList}>
+          <span aria-hidden="true">+</span>
+          <span className="hide-sm">{t.nav.addListing}</span>
+        </button>
         <Link href={switchHref} className="btn secondary small" aria-label={t.common.language}>
           {other.toUpperCase()}
         </Link>
+
         {user ? (
-          <button className="btn secondary small" onClick={logout}>
-            {t.common.logout}
-          </button>
+          <div className="menu" ref={menuRef}>
+            <button
+              type="button"
+              className="avatar-btn"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-label={t.nav.account}
+              onClick={() => setMenuOpen((o) => !o)}
+            >
+              {initial}
+            </button>
+            {menuOpen && (
+              <div className="dropdown" role="menu">
+                <div className="who">
+                  <strong>{user.name}</strong>
+                  {user.role === "admin" && <span className="badge approved" style={{ marginLeft: 8 }}>{t.nav.admin}</span>}
+                </div>
+                <Link href={`/${locale}`} role="menuitem">{t.nav.map}</Link>
+                <Link href={`/${locale}/bookings`} role="menuitem">{t.nav.myBookings}</Link>
+                <Link href={`/${locale}/owner`} role="menuitem">{t.nav.myListings}</Link>
+                <Link href={listHref} role="menuitem">{t.nav.addListing}</Link>
+                {user.role === "admin" && (
+                  <Link href={`/${locale}/admin`} role="menuitem">{t.nav.admin}</Link>
+                )}
+                <button type="button" role="menuitem" onClick={logout}>
+                  {t.common.logout}
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
-          <Link href={`/${locale}/login`} className="btn small">
+          <button type="button" className="btn small" onClick={() => openLogin()}>
             {t.common.login}
-          </Link>
+          </button>
         )}
       </div>
     </header>

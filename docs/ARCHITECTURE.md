@@ -35,7 +35,9 @@ Next.js ตัวเดียวทำทั้งหน้าเว็บแล
 ## การยืนยันตัวตน
 
 อีเมล + รหัสผ่าน (bcrypt) → JWT (HS256, `jose`) ใน cookie `session` แบบ httpOnly, sameSite=lax, อายุ 7 วัน
-- `middleware.ts` ตรวจ cookie เพื่อ redirect หน้าที่ต้องล็อกอิน/หน้าแอดมิน (ตรวจที่ edge)
+- หน้าแรก (แผนที่) และ `GET /api/listings` เปิดสาธารณะ; การจอง การส่งที่จอด และอัปโหลดรูปต้องล็อกอิน
+- ล็อกอิน/สมัครเป็นป๊อปอัป (`AuthProvider` + `AuthModal`) ไม่ใช่หน้าแยก: `requireLogin()` เปิดป๊อปอัปแล้วทำรายการที่ค้างต่อหลังล็อกอิน
+- `middleware.ts` ตรวจ cookie เฉพาะ `/owner`, `/bookings`, `/admin` ถ้าไม่ได้ล็อกอินจะ redirect ไปหน้าแรกพร้อม `?login=1&next=...` เพื่อเปิดป๊อปอัป; URL เก่า `/map`, `/login`, `/register` redirect ไปหน้าแรก
 - API ตรวจสิทธิ์ซ้ำเสมอผ่าน `requireUser()` / `requireAdmin()` — middleware ไม่ใช่ด่านเดียว
 
 ## หลายภาษา
