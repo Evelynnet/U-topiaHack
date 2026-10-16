@@ -66,6 +66,12 @@ export default function Navbar() {
             </Link>
           </>
         )}
+        {user && (
+          <Link href={`/${locale}/parking`} className="btn secondary small">
+            <span aria-hidden="true">🅿️</span>
+            <span className="hide-sm">{t.nav.parking}</span>
+          </Link>
+        )}
         <Link href={switchHref} className="btn secondary small" aria-label={t.common.language}>
           {other.toUpperCase()}
         </Link>
@@ -90,6 +96,7 @@ export default function Navbar() {
                 </div>
                 <Link href={`/${locale}`} role="menuitem">{t.nav.map}</Link>
                 <Link href={`/${locale}/bookings`} role="menuitem">{t.nav.myBookings}</Link>
+                <Link href={`/${locale}/parking`} role="menuitem">🅿️ {t.nav.parking}</Link>
                 <Link href={`/${locale}/owner`} role="menuitem">{t.nav.myListings}</Link>
                 {user.isOwner && (
                   <Link href={`/${locale}/owner/dashboard`} role="menuitem">{t.nav.ownerDashboard}</Link>

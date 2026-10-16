@@ -30,6 +30,7 @@ export const en: Dictionary = {
     ownerDashboard: "Space dashboard",
     adminDashboard: "Dashboard",
     review: "Review & approve",
+    parking: "My parking",
   },
   errors: {
     generic: "Something went wrong. Please try again.",
