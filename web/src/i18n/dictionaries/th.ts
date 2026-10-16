@@ -28,6 +28,7 @@ export const th = {
     ownerDashboard: "แดชบอร์ดที่จอด",
     adminDashboard: "แดชบอร์ด",
     review: "ตรวจสอบ/อนุมัติ",
+    parking: "กำลังจอด", 
   },
   errors: {
     generic: "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง",
