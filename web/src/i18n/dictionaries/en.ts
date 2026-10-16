@@ -2,7 +2,7 @@ import type { Dictionary } from "./th";
 
 export const en: Dictionary = {
   common: {
-    appName: "ParkSpot",
+    appName: "Jodni",
     login: "Log in",
     register: "Sign up",
     logout: "Log out",
@@ -30,7 +30,6 @@ export const en: Dictionary = {
     ownerDashboard: "Space dashboard",
     adminDashboard: "Dashboard",
     review: "Review & approve",
-    parking: "My parking",
   },
   errors: {
     generic: "Something went wrong. Please try again.",

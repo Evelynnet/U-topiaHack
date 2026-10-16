@@ -39,7 +39,7 @@ export default function Navbar() {
   return (
     <header className="navbar">
       <Link className="brand" href={`/${locale}`}>
-        🅿️ {t.common.appName}
+        <img src="/logo.png" alt="Jodni" style={{ height: 32, objectFit: "contain" }} />
       </Link>
       <div className="spacer" />
       <div className="right">

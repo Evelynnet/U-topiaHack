@@ -10,8 +10,8 @@ import { isListingOwner } from "@/lib/users";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  title: "ParkSpot",
-  description: "Find and book parking spaces / ค้นหาและจองที่จอดรถ",
+  title: "Jodni",
+  description: "Jodni - สมาร์ท พาร์คกิ้ง / ค้นหาและจองที่จอดรถ",
 };
 
 export function generateStaticParams() {
