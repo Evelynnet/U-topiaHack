@@ -29,3 +29,26 @@ export function bangkokToIso(date: string, hour: number): string {
 export function todayBangkok(): string {
   return new Date(Date.now() + BANGKOK_OFFSET_MS).toISOString().slice(0, 10);
 }
+
+/** Adds whole days to a YYYY-MM-DD date string (calendar arithmetic, no time zone involved). */
+export function addDays(date: string, days: number): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** The Monday of the week that contains the given YYYY-MM-DD date. */
+export function weekStartOf(date: string): string {
+  const dow = (new Date(`${date}T00:00:00Z`).getUTCDay() + 6) % 7; // Monday = 0
+  return addDays(date, -dow);
+}
+
+/** "Mon 12 Oct" / "จ. 12 ต.ค." for a YYYY-MM-DD date. */
+export function formatDay(date: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale === "th" ? "th-TH" : "en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).format(new Date(`${date}T00:00:00Z`));
+}

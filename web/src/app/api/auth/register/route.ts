@@ -21,5 +21,5 @@ export const POST = handle(async (req: Request) => {
   }
 
   await setSessionCookie({ userId: user.id, name: user.name, role: user.role });
-  return json({ user }, 201);
+  return json({ user: { ...user, isOwner: false } }, 201);
 });

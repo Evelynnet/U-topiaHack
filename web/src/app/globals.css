@@ -255,3 +255,30 @@ textarea { min-height: 90px; resize: vertical; }
   .sched-row { grid-template-columns: 1fr 1fr; }
   .sched-row .check { grid-column: 1 / -1; }
 }
+
+/* ---- Dashboards ---- */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.stat { display: grid; gap: 2px; padding: 10px 12px; background: var(--bg); border-radius: 10px; }
+.stat strong { font-size: 1.35rem; line-height: 1.2; }
+
+.bars { display: grid; gap: 8px; }
+.bar-row { display: grid; grid-template-columns: 72px 1fr; gap: 4px 10px; align-items: center; }
+.bar-row.today .bar-label { font-weight: 700; color: var(--primary); }
+.bar-label { font-size: .9rem; }
+.bar-track { height: 10px; background: var(--bg); border-radius: 999px; overflow: hidden; }
+.bar-fill { display: block; height: 100%; background: var(--primary); border-radius: 999px; }
+.bar-value { grid-column: 2; font-size: .85rem; color: var(--muted); }
+
+.mini-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.mini-table th, .mini-table td { text-align: left; padding: 6px 8px; border-top: 1px solid var(--border); }
+.mini-table thead th { border-top: 0; color: var(--muted); font-weight: 500; }
+
+.count-pill { background: #fff; color: var(--primary); border-radius: 999px; padding: 0 8px; margin-left: 8px; font-size: .8rem; font-weight: 700; }
+.inline-field { display: flex; align-items: center; gap: 8px; }
+
+.hchart { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; height: 180px; align-items: end; margin: 12px 0 8px; }
+.hcol { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; min-width: 0; }
+.hnum { font-size: .7rem; color: var(--muted); height: 1.1em; }
+.hstack { display: flex; flex-direction: column; width: 100%; min-height: 0; border-radius: 4px 4px 0 0; overflow: hidden; }
+.hlabel { font-size: .7rem; color: var(--muted); height: 1.2em; margin-top: 2px; }
+@media (max-width: 600px) { .hchart { gap: 2px; } .bar-row { grid-template-columns: 64px 1fr; } }

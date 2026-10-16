@@ -1,5 +1,6 @@
 import { setSessionCookie, verifyPassword } from "@/lib/auth";
 import { query } from "@/lib/db";
+import { isListingOwner } from "@/lib/users";
 import { HttpError, handle, json, readJson } from "@/lib/http";
 import { loginSchema } from "@/lib/validation";
 
@@ -19,5 +20,6 @@ export const POST = handle(async (req: Request) => {
   }
 
   await setSessionCookie({ userId: user.id, name: user.name, role: user.role });
-  return json({ user: { id: user.id, name: user.name, role: user.role } });
+  const isOwner = await isListingOwner(user.id);
+  return json({ user: { id: user.id, name: user.name, role: user.role, isOwner } });
 });
