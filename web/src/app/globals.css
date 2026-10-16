@@ -109,6 +109,12 @@ textarea { min-height: 90px; resize: vertical; }
 .badge.rejected, .badge.cancelled { background: #fee2e2; color: #991b1b; }
 .spread { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
 .thumbs { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.photos-layout { display: grid; grid-template-columns: 1fr 260px; gap: 16px; align-items: start; }
+.ai-example { margin: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #f8fafc; }
+.ai-example img { display: block; width: 100%; height: auto; }
+.ai-example figcaption { display: grid; gap: 2px; padding: 8px 10px; font-size: .8rem; color: var(--muted); }
+.ai-example figcaption strong { color: inherit; font-size: .85rem; }
+@media (max-width: 700px) { .photos-layout { grid-template-columns: 1fr; } .ai-example { max-width: 320px; } }
 .thumbs img { width: 96px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
 
 .section-title { display: flex; align-items: center; gap: 10px; font-size: 1.05rem; margin-bottom: 14px; }

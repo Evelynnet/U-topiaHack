@@ -204,13 +204,25 @@ export default function ListingForm() {
         </Section>
 
         <Section n={5} title={t.listing.photos}>
-          <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={onPhotos} disabled={uploading || photos.length >= 10} />
-          <div className="hint">{uploading ? t.listing.uploading : t.listing.photosHint}</div>
-          <div className="thumbs">
-            {photos.map((url) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={url} src={url} alt="" />
-            ))}
+          <div className="photos-layout">
+            <div className="photos-main">
+              <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={onPhotos} disabled={uploading || photos.length >= 10} />
+              <div className="hint">{uploading ? t.listing.uploading : t.listing.photosHint}</div>
+              <div className="thumbs">
+                {photos.map((url) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={url} src={url} alt="" />
+                ))}
+              </div>
+            </div>
+            <figure className="ai-example">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/ai-detect-example.jpg" alt={t.listing.aiExampleAlt} />
+              <figcaption>
+                <strong>{t.listing.aiExampleTitle}</strong>
+                <span>{t.listing.aiExampleHint}</span>
+              </figcaption>
+            </figure>
           </div>
         </Section>
 
