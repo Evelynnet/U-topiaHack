@@ -74,7 +74,7 @@ export default function ParkingDashboard() {
     if (!booking) return;
     setLeaving(true);
     try {
-      await postJson(`/api/bookings/${booking.id}/cancel`);
+      await postJson(`/api/bookings/${booking.id}/checkout`);
       router.push("/");
     } catch (err) {
       setError(errorMessage(t, err));
