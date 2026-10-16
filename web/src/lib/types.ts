@@ -4,6 +4,18 @@ export interface AuthUser {
   id?: string;
   name: string;
   role: "user" | "admin";
+  /** True once the person has submitted at least one parking space (shows the owner dashboard). */
+  isOwner?: boolean;
+}
+
+/** Usage and money for one period. Hours are vehicle-hours (3 cars for 2 h = 6). */
+export interface StatTotals {
+  cars: number;
+  motorcycles: number;
+  hours: number;
+  gross: number;
+  commission: number;
+  net: number;
 }
 
 export interface VehicleAvailability {

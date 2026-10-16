@@ -11,7 +11,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { postJson } from "@/lib/api-client";
+import { api, postJson } from "@/lib/api-client";
 import type { AuthUser } from "@/lib/types";
 import { useI18n } from "@/i18n/provider";
 import AuthModal from "./AuthModal";
@@ -32,6 +32,8 @@ interface AuthValue {
   requireLogin: (reason?: string, onSuccess?: () => void) => boolean;
   openLogin: (req?: LoginRequest) => void;
   logout: () => Promise<void>;
+  /** Re-reads the account from the server (e.g. after the person becomes an owner). */
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthValue | null>(null);
@@ -96,6 +98,15 @@ export function AuthProvider({
     router.refresh();
   }, [locale, router]);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const data = await api<{ user: AuthUser }>("/api/auth/me");
+      setUser(data.user);
+    } catch {
+      /* keep what we have; the next full page load will sync it */
+    }
+  }, []);
+
   // Links like /th?login=1&next=/th/owner/new (the middleware sends guests here) open the pop-up.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -117,8 +128,8 @@ export function AuthProvider({
   }, [openLogin, router, t]);
 
   const value = useMemo<AuthValue>(
-    () => ({ user, requireLogin, openLogin, logout }),
-    [user, requireLogin, openLogin, logout],
+    () => ({ user, requireLogin, openLogin, logout, refreshUser }),
+    [user, requireLogin, openLogin, logout, refreshUser],
   );
 
   return (

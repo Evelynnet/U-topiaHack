@@ -40,6 +40,13 @@ Next.js ตัวเดียวทำทั้งหน้าเว็บแล
 - `middleware.ts` ตรวจ cookie เฉพาะ `/owner`, `/bookings`, `/admin` ถ้าไม่ได้ล็อกอินจะ redirect ไปหน้าแรกพร้อม `?login=1&next=...` เพื่อเปิดป๊อปอัป; URL เก่า `/map`, `/login`, `/register` redirect ไปหน้าแรก
 - API ตรวจสิทธิ์ซ้ำเสมอผ่าน `requireUser()` / `requireAdmin()` — middleware ไม่ใช่ด่านเดียว
 
+## แดชบอร์ด
+
+`lib/stats.ts` รวม SQL ของแดชบอร์ด: ช่วงเวลา (วัน/สัปดาห์จันทร์–อาทิตย์) คิดตามเวลา Asia/Bangkok แล้วส่งเป็น `timestamptz[]` เข้า `unnest(...)` การจองที่คาบเกี่ยวหลายช่วงนับทั้งสองช่วง แต่ชั่วโมงและเงินแบ่งตามสัดส่วนชั่วโมงที่ตกในแต่ละช่วง ใช้เฉพาะการจอง `confirmed`
+- `GET /api/owner/stats` — เฉพาะของเจ้าของที่ล็อกอิน (กรองด้วย `listings.owner_id`)
+- `GET /api/admin/stats?date=YYYY-MM-DD` — `requireAdmin()`; ผู้ใช้/รถต่อชั่วโมงของวันนั้น, ตอนนี้, ยอดวัน/สัปดาห์
+- ปุ่มแดชบอร์ดเจ้าของแสดงเมื่อ `user.isOwner` (มีที่จอดที่ส่งแล้วอย่างน้อย 1 รายการ) และหน้า `/owner/dashboard` ตอบ 404 ถ้าไม่ใช่เจ้าของ
+
 ## หลายภาษา
 
 URL ขึ้นต้นด้วย `/th` หรือ `/en` (middleware เลือกจาก cookie → `Accept-Language` → ไทย) พจนานุกรมอยู่ใน `web/src/i18n/dictionaries` โดย `en.ts` ถูกบังคับให้มีคีย์ตรงกับ `th.ts` ผ่านชนิดข้อมูล API ส่งกลับเป็นรหัสข้อผิดพลาด (`full`, `closed`, ...) ให้ UI แปลเอง

@@ -47,6 +47,25 @@ export default function Navbar() {
           <span aria-hidden="true">+</span>
           <span className="hide-sm">{t.nav.addListing}</span>
         </button>
+        {/* Owners only: people who have never listed a space don't see this. */}
+        {user?.isOwner && (
+          <Link href={`/${locale}/owner/dashboard`} className="btn secondary small">
+            <span aria-hidden="true">📊</span>
+            <span className="hide-sm">{t.nav.ownerDashboard}</span>
+          </Link>
+        )}
+        {user?.role === "admin" && (
+          <>
+            <Link href={`/${locale}/admin/dashboard`} className="btn secondary small">
+              <span aria-hidden="true">📈</span>
+              <span className="hide-sm">{t.nav.adminDashboard}</span>
+            </Link>
+            <Link href={`/${locale}/admin`} className="btn secondary small">
+              <span aria-hidden="true">✅</span>
+              <span className="hide-sm">{t.nav.review}</span>
+            </Link>
+          </>
+        )}
         <Link href={switchHref} className="btn secondary small" aria-label={t.common.language}>
           {other.toUpperCase()}
         </Link>
@@ -72,9 +91,15 @@ export default function Navbar() {
                 <Link href={`/${locale}`} role="menuitem">{t.nav.map}</Link>
                 <Link href={`/${locale}/bookings`} role="menuitem">{t.nav.myBookings}</Link>
                 <Link href={`/${locale}/owner`} role="menuitem">{t.nav.myListings}</Link>
+                {user.isOwner && (
+                  <Link href={`/${locale}/owner/dashboard`} role="menuitem">{t.nav.ownerDashboard}</Link>
+                )}
                 <Link href={listHref} role="menuitem">{t.nav.addListing}</Link>
                 {user.role === "admin" && (
-                  <Link href={`/${locale}/admin`} role="menuitem">{t.nav.admin}</Link>
+                  <>
+                    <Link href={`/${locale}/admin/dashboard`} role="menuitem">{t.nav.adminDashboard}</Link>
+                    <Link href={`/${locale}/admin`} role="menuitem">{t.nav.review}</Link>
+                  </>
                 )}
                 <button type="button" role="menuitem" onClick={logout}>
                   {t.common.logout}

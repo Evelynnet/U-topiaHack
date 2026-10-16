@@ -1,11 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { useI18n } from "@/i18n/provider";
+import { useAuth } from "./AuthProvider";
 
 /** Shown right after an owner submits a space: it now waits for the agency to confirm it. */
 export default function ListingSubmitted() {
   const { locale, t } = useI18n();
+  const { refreshUser } = useAuth();
+
+  // Submitting a space makes the person an owner: reveal the owner dashboard button.
+  useEffect(() => {
+    void refreshUser();
+  }, [refreshUser]);
 
   return (
     <div className="page" style={{ maxWidth: 520 }}>

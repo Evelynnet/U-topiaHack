@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import { getDictionary, isLocale, locales } from "@/i18n/config";
 import { I18nProvider } from "@/i18n/provider";
 import { getSession } from "@/lib/auth";
+import { isListingOwner } from "@/lib/users";
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -28,7 +29,14 @@ export default async function RootLayout({
   if (!isLocale(locale)) notFound();
 
   const session = await getSession();
-  const initialUser = session ? { id: session.userId, name: session.name, role: session.role } : null;
+  const initialUser = session
+    ? {
+        id: session.userId,
+        name: session.name,
+        role: session.role,
+        isOwner: await isListingOwner(session.userId).catch(() => false),
+      }
+    : null;
 
   return (
     <html lang={locale}>
